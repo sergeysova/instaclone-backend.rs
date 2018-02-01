@@ -24,9 +24,9 @@ impl HelloResponse {
 
 const not_found_json: &'static str = r#"{ "error": "not_found" }"#;
 
-struct HelloWorld;
+struct Application;
 
-impl Service for HelloWorld {
+impl Service for Application {
     type Request = Request;
     type Response = Response;
     type Error = hyper::Error;
@@ -46,18 +46,12 @@ impl Service for HelloWorld {
                 ))
             }
         }
-
-//        Box::new(futures::future::ok(
-//            Response::new()
-//                .with_header(ContentLength(resp_string.len() as u64))
-//                .with_body(resp_string)
-//        ))
     }
 }
 
 fn main() {
     let addr = "127.0.0.1:3000".parse().unwrap();
-    let server = Http::new().bind(&addr, || Ok(HelloWorld)).unwrap();
+    let server = Http::new().bind(&addr, || Ok(Application)).unwrap();
 
     println!("Listening {address}...", address=addr);
     server.run().unwrap();
