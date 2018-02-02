@@ -52,6 +52,7 @@ impl Service for Application {
     type Future = Box<Future<Item=Self::Response, Error=Self::Error>>;
 
     fn call(&self, req: Request) -> Self::Future {
+        println!("{} {}", req.method(), req.path());
         match (req.method(), req.path()) {
             (&Method::Get, "/") => wrap_response(
                 create_text_response(JSON_STATUS_OK, None)
