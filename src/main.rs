@@ -1,8 +1,16 @@
 extern crate hyper;
 extern crate futures;
+
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
+
+#[macro_use] extern crate diesel;
+extern crate dotenv;
+
+mod connection;
+mod schema;
+mod models;
 
 use futures::future::Future;
 use futures::future;
@@ -43,7 +51,16 @@ fn create_text_response(answer: &str, status: Option<StatusCode>) -> Response {
     response
 }
 
-struct Application;
+struct Application {
+    connection: connection::InstacloneConnection,
+}
+
+impl Application {
+    fn new(connection: connection::InstacloneConnection) -> Application {
+        Application { connection }
+    }
+}
+
 
 impl Service for Application {
     type Request = Request;
@@ -53,6 +70,7 @@ impl Service for Application {
 
     fn call(&self, req: Request) -> Self::Future {
         println!("{} {}", req.method(), req.path());
+
         match (req.method(), req.path()) {
             (&Method::Get, "/") => wrap_response(
                 create_text_response(JSON_STATUS_OK, None)
@@ -67,6 +85,19 @@ impl Service for Application {
                     )
                 )
             },
+            (&Method::Get, "/posts") => {
+                use schema::posts::dsl::*;
+                use models::*;
+
+                let results = posts
+                    .limit(10)
+                    .load::<models::Post>(&self.connection)
+                    .expect("Error");
+
+                wrap_response(
+                    create_text_response("", None)
+                )
+            },
             _ => wrap_response(
                 create_text_response(JSON_NOT_FOUND, Some(StatusCode::NotFound))
             ),
@@ -76,7 +107,10 @@ impl Service for Application {
 
 fn main() {
     let addr = "127.0.0.1:3000".parse().unwrap();
-    let server = Http::new().bind(&addr, || Ok(Application)).unwrap();
+
+    let server = Http::new()
+        .bind(&addr, || Ok(Application { connection: connection::establish_connection() }))
+        .unwrap();
 
     println!("Listening {address}...", address=addr);
     server.run().unwrap();
