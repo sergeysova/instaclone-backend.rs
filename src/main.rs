@@ -13,16 +13,35 @@ use hyper::server::{Http, Request, Response, Service};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct HelloResponse {
-    name: String,
+    hello: String,
 }
 
 impl HelloResponse {
     fn new(name: String) -> HelloResponse {
-        HelloResponse { name }
+        HelloResponse { hello: name }
     }
 }
 
-const not_found_json: &'static str = r#"{ "error": "not_found" }"#;
+const JSON_NOT_FOUND: &'static str = r#"{ "error": "not_found" }"#;
+const JSON_STATUS_OK: &'static str = r#"{ "status": "ok" }"#;
+
+fn wrap_response(response: Response) -> Box<Future<Item=Response, Error=hyper::Error>> {
+    Box::new(
+        future::ok(response)
+    )
+}
+
+fn create_text_response(answer: &str, status: Option<StatusCode>) -> Response {
+    let mut response = Response::new()
+        .with_header(ContentLength(answer.len() as u64))
+        .with_body(String::from(answer));
+
+    if let Some(status) = status {
+        response = response.with_status(status);
+    }
+
+    response
+}
 
 struct Application;
 
@@ -33,18 +52,23 @@ impl Service for Application {
     type Future = Box<Future<Item=Self::Response, Error=Self::Error>>;
 
     fn call(&self, req: Request) -> Self::Future {
-        let resp = HelloResponse::new("Sova".into());
-        let resp_string = serde_json::to_string(&resp).unwrap();
-
         match (req.method(), req.path()) {
-            _ => {
-                Box::new(future::ok(
-                    Response::new()
-                        .with_status(StatusCode::NotFound)
-                        .with_header(ContentLength(not_found_json.len() as u64))
-                        .with_body(not_found_json)
-                ))
-            }
+            (&Method::Get, "/") => wrap_response(
+                create_text_response(JSON_STATUS_OK, None)
+            ),
+            (&Method::Get, "/hello") => {
+                let body = serde_json::to_string(&HelloResponse::new("World".into())).unwrap();
+
+                wrap_response(
+                    create_text_response(
+                        &body.to_owned()[..],
+                        None,
+                    )
+                )
+            },
+            _ => wrap_response(
+                create_text_response(JSON_NOT_FOUND, Some(StatusCode::NotFound))
+            ),
         }
     }
 }
