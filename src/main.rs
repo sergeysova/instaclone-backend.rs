@@ -62,7 +62,7 @@ impl Service for Application {
                 wrap_response(
                     create_text_response(
                         &body.to_owned()[..],
-                        None,
+                        Some(StatusCode::Created),
                     )
                 )
             },
