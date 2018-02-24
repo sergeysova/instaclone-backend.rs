@@ -4,6 +4,7 @@ extern crate futures;
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
+extern crate url;
 
 #[macro_use] extern crate diesel;
 extern crate dotenv;
@@ -12,8 +13,11 @@ mod connection;
 mod schema;
 mod models;
 
-use futures::future::Future;
+use url::form_urlencoded;
+
+use futures::future::{Future};
 use futures::future;
+use futures::Stream;
 
 use hyper::{StatusCode, Method};
 use hyper::header::{ContentLength};
@@ -85,19 +89,27 @@ impl Service for Application {
                     )
                 )
             },
-            (&Method::Get, "/posts") => {
-                use schema::posts::dsl::*;
-                use models::*;
-
-                let results = posts
-                    .limit(10)
-                    .load::<models::Post>(&self.connection)
-                    .expect("Error");
-
+            (&Method::Post, "/file") => {
                 wrap_response(
-                    create_text_response("", None)
+                    create_text_response(
+                        "{}",
+                        Some(StatusCode::Ok),
+                    )
                 )
             },
+//            (&Method::Get, "/posts") => {
+//                use schema::posts::dsl::*;
+//                use models::*;
+//
+//                let results = posts
+//                    .limit(10)
+//                    .load::<models::Post>(&self.connection)
+//                    .expect("Error");
+//
+//                wrap_response(
+//                    create_text_response("", None)
+//                )
+//            },
             _ => wrap_response(
                 create_text_response(JSON_NOT_FOUND, Some(StatusCode::NotFound))
             ),
