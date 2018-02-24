@@ -3,3 +3,6 @@
 **/*.rs.bk
 .idea
 db.sqlite3
+
+/target/
+**/*.rs.bk

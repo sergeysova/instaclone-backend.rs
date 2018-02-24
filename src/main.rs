@@ -1,129 +1,67 @@
-extern crate hyper;
-extern crate futures;
-
-extern crate serde;
-#[macro_use] extern crate serde_derive;
-extern crate serde_json;
-extern crate url;
-
-#[macro_use] extern crate diesel;
 extern crate dotenv;
+extern crate env_logger;
+extern crate fanta;
+extern crate serde;
+extern crate serde_json;
+extern crate tokio_proto;
+extern crate tokio_service;
+extern crate time;
 
-mod connection;
-mod schema;
-mod models;
+#[macro_use] extern crate serde_derive;
+#[macro_use] extern crate lazy_static;
+#[macro_use] extern crate diesel;
 
-use url::form_urlencoded;
+pub mod schema;
+pub mod models;
 
-use futures::future::{Future};
-use futures::future;
-use futures::Stream;
+mod context;
+mod util;
 
-use hyper::{StatusCode, Method};
-use hyper::header::{ContentLength};
-use hyper::server::{Http, Request, Response, Service};
+use fanta::{App, MiddlewareChain};
+use time::Duration;
+use context::{generate_context, Ctx};
 
-#[derive(Debug, Serialize, Deserialize)]
-struct HelloResponse {
-    hello: String,
+lazy_static! {
+  static ref APP: App<Ctx> = {
+    let mut _app = App::<Ctx>::create(generate_context);
+
+    _app.use_middleware("/", profiling);
+
+    _app.set404(vec![not_found_404]);
+
+    _app
+  };
 }
 
-impl HelloResponse {
-    fn new(name: String) -> HelloResponse {
-        HelloResponse { hello: name }
-    }
+fn not_found_404(context: Ctx, _chain: &MiddlewareChain<Ctx>) -> Ctx {
+  let mut context = Ctx::new(context);
+
+  context.body = "<html>
+  ( ͡° ͜ʖ ͡°) What're you looking for here?
+</html>".to_owned();
+  context.set_header("Content-Type", "text/html");
+  context.status_code = 404;
+
+  context
 }
 
-const JSON_NOT_FOUND: &'static str = r#"{ "error": "not_found" }"#;
-const JSON_STATUS_OK: &'static str = r#"{ "status": "ok" }"#;
+fn profiling(context: Ctx, chain: &MiddlewareChain<Ctx>) -> Ctx {
+  let start_time = time::now();
 
-fn wrap_response(response: Response) -> Box<Future<Item=Response, Error=hyper::Error>> {
-    Box::new(
-        future::ok(response)
-    )
-}
+  let context = chain.next(context);
 
-fn create_text_response(answer: &str, status: Option<StatusCode>) -> Response {
-    let mut response = Response::new()
-        .with_header(ContentLength(answer.len() as u64))
-        .with_body(String::from(answer));
+  let elapsed_time: Duration = time::now() - start_time;
+  println!("[{}micros] {} -- {}",
+    elapsed_time.num_microseconds().unwrap(),
+    context.method.clone(),
+    context.path.clone());
 
-    if let Some(status) = status {
-        response = response.with_status(status);
-    }
-
-    response
-}
-
-struct Application {
-    connection: connection::InstacloneConnection,
-}
-
-impl Application {
-    fn new(connection: connection::InstacloneConnection) -> Application {
-        Application { connection }
-    }
-}
-
-
-impl Service for Application {
-    type Request = Request;
-    type Response = Response;
-    type Error = hyper::Error;
-    type Future = Box<Future<Item=Self::Response, Error=Self::Error>>;
-
-    fn call(&self, req: Request) -> Self::Future {
-        println!("{} {}", req.method(), req.path());
-
-        match (req.method(), req.path()) {
-            (&Method::Get, "/") => wrap_response(
-                create_text_response(JSON_STATUS_OK, None)
-            ),
-            (&Method::Get, "/hello") => {
-                let body = serde_json::to_string(&HelloResponse::new("World".into())).unwrap();
-
-                wrap_response(
-                    create_text_response(
-                        &body.to_owned()[..],
-                        Some(StatusCode::Created),
-                    )
-                )
-            },
-            (&Method::Post, "/file") => {
-                wrap_response(
-                    create_text_response(
-                        "{}",
-                        Some(StatusCode::Ok),
-                    )
-                )
-            },
-//            (&Method::Get, "/posts") => {
-//                use schema::posts::dsl::*;
-//                use models::*;
-//
-//                let results = posts
-//                    .limit(10)
-//                    .load::<models::Post>(&self.connection)
-//                    .expect("Error");
-//
-//                wrap_response(
-//                    create_text_response("", None)
-//                )
-//            },
-            _ => wrap_response(
-                create_text_response(JSON_NOT_FOUND, Some(StatusCode::NotFound))
-            ),
-        }
-    }
+  context
 }
 
 fn main() {
-    let addr = "127.0.0.1:3000".parse().unwrap();
+  println!("Starting server...");
 
-    let server = Http::new()
-        .bind(&addr, || Ok(Application { connection: connection::establish_connection() }))
-        .unwrap();
-
-    println!("Listening {address}...", address=addr);
-    server.run().unwrap();
+  drop(env_logger::init());
+  App::start(&APP, "0.0.0.0".to_string(), "8080".to_string());
 }

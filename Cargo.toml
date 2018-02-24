@@ -1,17 +1,18 @@
 [package]
-name = "instaclone-backend"
+name = "instaclone_backend"
 version = "0.1.0"
 authors = ["Sergey Sova <mail@sergeysova.com>"]
 
 [dependencies]
-hyper = "0.11.16"
-futures = "0.1.18"
-serde = "1.0.27"
-serde_derive = "1.0.27"
-serde_json = "1.0.9"
-dotenv = "0.10.1"
-url = "1.6.0"
+diesel = { version = "1.0.0-rc1", features = ["postgres", "uuid"] }
+dotenv = "0.9.0"
+fanta = "0.1.5"
+lazy_static = "0.2"
+serde = "1.0.24"
+serde_json = "1.0.8"
+serde_derive = "1.0.24"
+time = "0.1.38"
+tokio-proto = "0.1"
+tokio-service = "0.1"
+env_logger = { version = "0.3.4", default-features = false }
 
-[dependencies.diesel]
-version = "1.1.1"
-features = ["sqlite"]
