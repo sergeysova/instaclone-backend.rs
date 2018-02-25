@@ -15,7 +15,6 @@ extern crate dotenv;
 extern crate r2d2;
 extern crate r2d2_diesel;
 
-use diesel::prelude::*;
 use dotenv::dotenv;
 
 pub mod schema;
@@ -28,10 +27,9 @@ mod db;
 fn main() {
     dotenv().ok();
 
-
     rocket::ignite()
         .manage(db::establish_connection())
-        .mount("/", routes![routes::get_index])
+        .mount("/", routes![routes::get_users])
         // .catch(errors![error_404])
         .launch();
 }
