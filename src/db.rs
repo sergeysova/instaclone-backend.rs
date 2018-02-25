@@ -10,6 +10,7 @@ use rocket::{Request, State, Outcome};
 
 pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
+/// Create pool of connections to postgres
 pub fn establish_connection() -> DbPool {
     let db_url = env::var("DATABASE_URL")
         .expect("DATABASE_URL must be present");

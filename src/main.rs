@@ -20,8 +20,8 @@ use dotenv::dotenv;
 pub mod schema;
 pub mod models;
 
-mod routes;
-mod db;
+pub mod routes;
+pub mod db;
 
 
 fn main() {
@@ -29,7 +29,7 @@ fn main() {
 
     rocket::ignite()
         .manage(db::establish_connection())
-        .mount("/", routes![routes::get_users])
+        .mount("/", routes![routes::get_users, routes::get_user])
         // .catch(errors![error_404])
         .launch();
 }
