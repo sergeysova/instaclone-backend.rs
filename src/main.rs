@@ -16,30 +16,21 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 
 use diesel::prelude::*;
-use diesel::pg::PgConnection;
-use r2d2_diesel::ConnectionManager;
 use dotenv::dotenv;
-use std::env;
+
+pub mod schema;
+pub mod models;
 
 mod routes;
+mod db;
 
-
-type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
-
-fn establish_connection() -> DbPool {
-    dotenv().ok();
-
-    let db_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be present");
-
-    let manager = ConnectionManager::<PgConnection>::new(db_url.as_str());
-
-    r2d2::Pool::new(manager).expect(&format!("Can't connect to database pool {}", &db_url))
-}
 
 fn main() {
+    dotenv().ok();
+
+
     rocket::ignite()
-        .manage(establish_connection())
+        .manage(db::establish_connection())
         .mount("/", routes![routes::get_index])
         // .catch(errors![error_404])
         .launch();
