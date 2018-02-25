@@ -1,12 +1,7 @@
 
 use rocket_contrib::Json;
-use diesel::QueryResult;
-use diesel::prelude::*;
-use diesel::result::Error;
 
-use db::DbConn;
-use models::User;
-use schema::users::dsl;
+pub mod users;
 
 pub type ApiJson<T> = Json<ApiResponse<T>>;
 pub type ApiJsonVec<T> = Json<ApiResponse<Vec<T>>>;
@@ -57,19 +52,3 @@ impl<T> ApiResponse<T> {
 }
 
 
-/// Get users list
-#[get("/users")]
-pub fn get_users(conn: DbConn) -> QueryResult<ApiJsonVec<User>> {
-  dsl::users
-    .load::<User>(&*conn)
-    .map(ApiResponse::json_vec)
-}
-
-/// Get specific user by ID
-#[get("/users/<user_id>")]
-pub fn get_user(conn: DbConn, user_id: u32) -> QueryResult<ApiJson<User>> {
-  dsl::users.find(user_id as i32)
-    .load::<User>(&*conn)
-    .and_then(|list| list.first().cloned().ok_or(Error::NotFound))
-    .map(ApiResponse::json)
-}

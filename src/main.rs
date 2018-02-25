@@ -29,7 +29,7 @@ fn main() {
 
     rocket::ignite()
         .manage(db::establish_connection())
-        .mount("/", routes![routes::get_users, routes::get_user])
+        .mount("/", routes![routes::users::index, routes::users::get])
         // .catch(errors![error_404])
         .launch();
 }
