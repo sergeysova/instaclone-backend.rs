@@ -1,5 +1,5 @@
 [package]
-name = "instaclone-backend"
+name = "instaclone_backend"
 version = "0.1.0"
 authors = ["Sergey Sova <mail@sergeysova.com>"]
 
