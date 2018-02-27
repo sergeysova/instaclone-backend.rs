@@ -7,11 +7,11 @@ use rocket::http::{Cookie, Cookies};
 use db::DbConn;
 use models::Session;
 use schema::sessions::dsl;
-use super::{ApiJson, ApiJsonVec, ApiResponse,};
+use super::{ApiJson, ApiJsonVec, ApiResponse, ApiKey};
 
 #[get("/")]
-pub fn get(conn: DbConn) {
-
+pub fn get(conn: DbConn, key: ApiKey) -> String {
+  key.0.clone()
 }
 
 #[post("/")]
