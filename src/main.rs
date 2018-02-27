@@ -13,7 +13,15 @@ fn main() {
 
     rocket::ignite()
         .manage(db::establish_connection())
-        .mount("/", routes![routes::users::index, routes::users::get])
+        .mount("/users", routes![
+            routes::users::index,
+            routes::users::get,
+        ])
+        .mount("/session", routes![
+            routes::session::create,
+            routes::session::get,
+            routes::session::destroy,
+        ])
         // .catch(errors![error_404])
         .launch();
 }

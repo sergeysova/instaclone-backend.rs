@@ -2,6 +2,7 @@
 use rocket_contrib::Json;
 
 pub mod users;
+pub mod session;
 
 pub type ApiJson<T> = Json<ApiResponse<T>>;
 pub type ApiJsonVec<T> = Json<ApiResponse<Vec<T>>>;
