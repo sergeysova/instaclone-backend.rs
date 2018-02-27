@@ -1,25 +1,32 @@
-use diesel::prelude::*;
-use diesel::QueryResult;
-use diesel::result::Error;
+// use diesel::prelude::*;
+// use diesel::QueryResult;
+// use diesel::result::Error;
 
 use rocket::http::{Cookie, Cookies};
 
 use db::DbConn;
-use models::Session;
-use schema::sessions::dsl;
+// use models::Session;
+// use schema::sessions::dsl;
 use super::{ApiJson, ApiJsonVec, ApiResponse, ApiKey};
 
-#[get("/")]
-pub fn get(conn: DbConn, key: ApiKey) -> String {
-  key.0.clone()
+#[derive(Serialize)]
+pub struct KeyResponse {
+  key: String,
 }
 
-#[post("/")]
-pub fn create(conn: DbConn) {
+#[get("/", format="application/json")]
+pub fn get(_conn: DbConn, key: ApiKey) -> ApiJson<KeyResponse> {
+  ApiResponse::json(KeyResponse {
+    key: key.0.clone(),
+  })
+}
+
+#[post("/", format="application/json")]
+pub fn create(_conn: DbConn) {
 
 }
 
-#[delete("/")]
-pub fn destroy(conn: DbConn) {
+#[delete("/", format="application/json")]
+pub fn destroy(_conn: DbConn) {
 
 }

@@ -9,7 +9,7 @@ use super::{ApiJson, ApiJsonVec, ApiResponse};
 
 
 /// Get users list
-#[get("/")]
+#[get("/", format="application/json")]
 pub fn index(conn: DbConn) -> QueryResult<ApiJsonVec<User>> {
   dsl::users
     .load::<User>(&*conn)
@@ -17,7 +17,7 @@ pub fn index(conn: DbConn) -> QueryResult<ApiJsonVec<User>> {
 }
 
 /// Get specific user by ID
-#[get("/<user_id>")]
+#[get("/<user_id>", format="application/json")]
 pub fn get(conn: DbConn, user_id: u32) -> QueryResult<ApiJson<User>> {
   dsl::users.find(user_id as i32)
     .load::<User>(&*conn)
