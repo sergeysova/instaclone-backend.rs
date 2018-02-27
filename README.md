@@ -10,3 +10,51 @@
 6. Migrate database: `diesel migration run`
 7. Review `Rocket.toml`
 8. **Start app**: `cargo run`
+
+
+## Authorization
+
+Send token in header `Authorization: Token asdqwezxc`.
+
+Where `asdqwezxc` is your token received from `POST /session`.
+
+### `GET /session`
+
+Get info about current session.
+
+Response:
+
+```json
+{
+  "data": {
+    "user_id": 123
+  }
+}
+```
+
+### `POST /session`
+
+Create new token. Log in.
+
+Receive:
+
+```json
+{
+  "login": "string",
+  "password": "string"
+}
+```
+
+Response:
+
+```json
+{
+  "data" {
+    "token": "asdqwezxc"
+  }
+}
+```
+
+### `DELETE /session`
+
+Destroy current token. Log out.
