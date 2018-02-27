@@ -27,7 +27,8 @@ Response:
 ```json
 {
   "data": {
-    "user_id": 123
+    "id": 123,
+    "username": "foo"
   }
 }
 ```

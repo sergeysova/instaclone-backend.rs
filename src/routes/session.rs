@@ -11,14 +11,16 @@ use routes::{ApiJson, ApiJsonVec, ApiResponse};
 use auth::Auth;
 
 #[derive(Serialize)]
-pub struct KeyResponse {
-  key: String,
+pub struct SessionResponse {
+  id: i32,
+  username: String,
 }
 
 #[get("/", format="application/json")]
-pub fn get(_conn: DbConn, auth: Auth) -> ApiJson<KeyResponse> {
-  ApiResponse::json(KeyResponse {
-    key: auth.user.username.clone(),
+pub fn get(auth: Auth) -> ApiJson<SessionResponse> {
+  ApiResponse::json(SessionResponse {
+    id: auth.user.id,
+    username: auth.user.username,
   })
 }
 
@@ -28,6 +30,6 @@ pub fn create(_conn: DbConn) {
 }
 
 #[delete("/", format="application/json")]
-pub fn destroy(_conn: DbConn) {
+pub fn destroy(_auth: Auth) {
 
 }
