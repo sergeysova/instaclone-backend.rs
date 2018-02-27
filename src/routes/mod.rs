@@ -34,6 +34,8 @@ pub struct ApiError {
 #[derive(Serialize)]
 pub struct ApiResponse<T> {
   pub data: Option<T>,
+
+  #[serde(skip_serializing_if="Option::is_none")]
   pub errors: Option<Vec<ApiError>>,
 }
 
@@ -99,12 +101,20 @@ pub mod catch {
     error: String,
   }
 
+  impl Error {
+    fn new<T: Into<String>>(error: T) -> Error {
+      Error { error: error.into() }
+    }
+  }
+
   #[error(400)]
-  pub fn handle_400(req: &Request) -> ApiJson<Error> {
-    println!("req={:?}", req);
-    ApiResponse::json(Error {
-      error: "bad_request".into(),
-    })
+  pub fn handle_400(_req: &Request) -> ApiJson<Error> {
+    ApiResponse::json(Error::new("bad_request"))
+  }
+
+  #[error(404)]
+  pub fn handle_404(_req: &Request) -> ApiJson<Error> {
+    ApiResponse::json(Error::new("not_found"))
   }
 }
 
