@@ -22,6 +22,6 @@ fn main() {
             routes::session::get,
             routes::session::destroy,
         ])
-        // .catch(errors![error_404])
+        .catch(errors![routes::catch::handle_400])
         .launch();
 }

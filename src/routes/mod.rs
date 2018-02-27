@@ -76,12 +76,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for ApiKey {
   fn from_request(request: &'a Request) -> Outcome<Self, (Status, Self::Error), ()> {
     let key = request.headers().get_one("Authorization");
 
-    println!("key {:?}", key);
-
     if let Some(auth_header) = key {
       let chunks: Vec<_> = auth_header.split(' ').map(str::to_string).collect();
-
-      println!("chunks {:?}", chunks);
 
       if chunks.len() == 2 && chunks[0] == "Token" {
         Outcome::Success(ApiKey::new(chunks[1].clone()))
@@ -91,6 +87,24 @@ impl<'a, 'r> FromRequest<'a, 'r> for ApiKey {
     } else {
       Outcome::Failure((Status::BadRequest, ApiKeyError::NoHeader))
     }
+  }
+}
+
+pub mod catch {
+  use rocket::Request;
+  use super::{ApiJson, ApiResponse};
+
+  #[derive(Serialize)]
+  pub struct Error {
+    error: String,
+  }
+
+  #[error(400)]
+  pub fn handle_400(req: &Request) -> ApiJson<Error> {
+    println!("req={:?}", req);
+    ApiResponse::json(Error {
+      error: "bad_request".into(),
+    })
   }
 }
 
