@@ -7,7 +7,8 @@ use rocket::http::{Cookie, Cookies};
 use db::DbConn;
 // use models::Session;
 // use schema::sessions::dsl;
-use super::{ApiJson, ApiJsonVec, ApiResponse, ApiKey};
+use routes::{ApiJson, ApiJsonVec, ApiResponse};
+use auth::Auth;
 
 #[derive(Serialize)]
 pub struct KeyResponse {
@@ -15,9 +16,9 @@ pub struct KeyResponse {
 }
 
 #[get("/", format="application/json")]
-pub fn get(_conn: DbConn, key: ApiKey) -> ApiJson<KeyResponse> {
+pub fn get(_conn: DbConn, auth: Auth) -> ApiJson<KeyResponse> {
   ApiResponse::json(KeyResponse {
-    key: key.0.clone(),
+    key: auth.user.username.clone(),
   })
 }
 

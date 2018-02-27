@@ -56,42 +56,6 @@ impl<T> ApiResponse<T> {
   }
 }
 
-#[derive(Debug)]
-pub enum ApiKeyError {
-  NoHeader,
-  InvalidToken,
-  InvalidHeader,
-}
-
-/// Represents API Key from header `Authorization: Token asdqwezxc123`
-pub struct ApiKey(String);
-
-impl ApiKey {
-  fn new<T: Into<String>>(key: T) -> ApiKey {
-    ApiKey(key.into())
-  }
-}
-
-impl<'a, 'r> FromRequest<'a, 'r> for ApiKey {
-  type Error = ApiKeyError;
-
-  fn from_request(request: &'a Request) -> Outcome<Self, (Status, Self::Error), ()> {
-    let key = request.headers().get_one("Authorization");
-
-    if let Some(auth_header) = key {
-      let chunks: Vec<_> = auth_header.split(' ').map(str::to_string).collect();
-
-      if chunks.len() == 2 && chunks[0] == "Token" {
-        Outcome::Success(ApiKey::new(chunks[1].clone()))
-      } else {
-        Outcome::Failure((Status::BadRequest, ApiKeyError::InvalidHeader))
-      }
-    } else {
-      Outcome::Failure((Status::BadRequest, ApiKeyError::NoHeader))
-    }
-  }
-}
-
 pub mod catch {
   use rocket::Request;
   use super::{ApiJson, ApiResponse};

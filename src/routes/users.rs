@@ -5,7 +5,7 @@ use diesel::result::Error;
 use db::DbConn;
 use models::User;
 use schema::users::dsl;
-use super::{ApiJson, ApiJsonVec, ApiResponse};
+use routes::{ApiJson, ApiJsonVec, ApiResponse};
 
 
 /// Get users list
