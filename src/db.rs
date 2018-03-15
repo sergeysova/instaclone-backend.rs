@@ -23,22 +23,22 @@ pub fn establish_connection() -> DbPool {
 pub struct DbConn(pub r2d2::PooledConnection<ConnectionManager<PgConnection>>);
 
 impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
-  type Error = ();
+    type Error = ();
 
-  fn from_request(request: &'a Request<'r>) -> request::Outcome<DbConn, Self::Error> {
-    let pool = request.guard::<State<DbPool>>()?;
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<DbConn, Self::Error> {
+        let pool = request.guard::<State<DbPool>>()?;
 
-    match pool.get() {
-      Ok(conn) => Outcome::Success(DbConn(conn)),
-      Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
+        match pool.get() {
+            Ok(conn) => Outcome::Success(DbConn(conn)),
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
+        }
     }
-  }
 }
 
 impl Deref for DbConn {
-  type Target = PgConnection;
+    type Target = PgConnection;
 
-  fn deref(&self) -> &Self::Target {
-    &self.0
-  }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

@@ -2,6 +2,7 @@
 // use diesel::QueryResult;
 // use diesel::result::Error;
 
+use rocket;
 use rocket::http::{Cookie, Cookies};
 
 use db::DbConn;
@@ -12,24 +13,35 @@ use auth::Auth;
 
 #[derive(Serialize)]
 pub struct SessionResponse {
-  id: i32,
-  username: String,
+    id: i32,
+    username: String,
 }
 
+
+
 #[get("/", format="application/json")]
-pub fn get(auth: Auth) -> ApiJson<SessionResponse> {
-  ApiResponse::json(SessionResponse {
-    id: auth.user.id,
-    username: auth.user.username,
-  })
+fn get(auth: Auth) -> ApiJson<SessionResponse> {
+    ApiResponse::json(SessionResponse {
+        id: auth.user.id,
+        username: auth.user.username,
+    })
 }
 
 #[post("/", format="application/json")]
-pub fn create(_conn: DbConn) {
+fn create(_conn: DbConn) {
 
 }
 
 #[delete("/", format="application/json")]
-pub fn destroy(_auth: Auth) {
+fn destroy(_auth: Auth) {
 
+}
+
+#[inline]
+pub fn mount() -> Vec<rocket::Route> {
+    routes![
+        get,
+        create,
+        destroy,
+    ]
 }

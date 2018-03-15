@@ -14,9 +14,16 @@ extern crate diesel;
 extern crate r2d2;
 extern crate r2d2_diesel;
 
-pub mod schema;
-pub mod models;
-
-pub mod routes;
 pub mod db;
-pub mod auth;
+
+mod schema;
+mod models;
+mod auth;
+mod routes;
+
+pub fn create_app() -> rocket::Rocket {
+    rocket::ignite()
+        .mount("/users", routes::users::mount())
+        .mount("/session", routes::session::mount())
+        .catch(routes::catch::errors())
+}
