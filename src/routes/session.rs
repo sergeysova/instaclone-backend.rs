@@ -4,6 +4,7 @@
 
 use rocket;
 use rocket::http::{Cookie, Cookies};
+use rocket_contrib::{Json};
 
 use db::DbConn;
 // use models::Session;
@@ -11,12 +12,12 @@ use db::DbConn;
 use routes::{ApiJson, ApiJsonVec, ApiResponse};
 use auth::Auth;
 
+
 #[derive(Serialize)]
 pub struct SessionResponse {
     id: i32,
     username: String,
 }
-
 
 
 #[get("/", format="application/json")]
@@ -27,9 +28,16 @@ fn get(auth: Auth) -> ApiJson<SessionResponse> {
     })
 }
 
-#[post("/", format="application/json")]
-fn create(_conn: DbConn) {
 
+#[derive(Deserialize, Serialize)]
+pub struct LoginBody {
+    username: String,
+    password: String,
+}
+
+#[post("/", format="application/json", data="<data>")]
+fn create(_conn: DbConn, data: Json<LoginBody>) -> ApiJson<LoginBody> {
+    ApiResponse::json(data.0)
 }
 
 #[delete("/", format="application/json")]
