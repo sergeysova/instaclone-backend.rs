@@ -12,4 +12,5 @@ deploy:
   file: "./target/release/instaclone_backend"
   on:
     repo: sergeysova/instaclone-backend.rs
+    tags: true
   skip_cleanup: true
