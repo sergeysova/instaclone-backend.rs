@@ -2,6 +2,10 @@ language: rust
 cache: cargo
 rust:
   - nightly
+os:
+  - linux
+  - osx
+  - windows
 deploy:
   provider: releases
   api_key:
