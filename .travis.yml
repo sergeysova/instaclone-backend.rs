@@ -5,7 +5,6 @@ rust:
 os:
   - linux
   - osx
-  - windows
 deploy:
   provider: releases
   api_key:
