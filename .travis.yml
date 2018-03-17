@@ -14,3 +14,6 @@ deploy:
     repo: sergeysova/instaclone-backend.rs
     tags: true
   skip_cleanup: true
+
+script:
+  - cargo build --verbose --release
